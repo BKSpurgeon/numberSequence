@@ -1,10 +1,15 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, div, h1, img)
-import Html.Attributes exposing (src)
+import Html exposing (Html, text, div, h1, img, section)
+import Html.Attributes exposing (src, class)
 
 
+{-
+To do:
+    (1) Update the favicon.ico requirements (multiple sizes)
+
+-}
 ---- MODEL ----
 
 
@@ -36,11 +41,13 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
-        ]
+    section [] 
+            [ div [ class "container"]
+                  [ h1 [] [text "Man vs Chimp"]
 
+                  ]             
+            ]
+    
 
 
 ---- PROGRAM ----
