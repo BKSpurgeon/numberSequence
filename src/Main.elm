@@ -82,7 +82,6 @@ subscriptions _ =
   Sub.none
 
 
-
 -- VIEW
 view : Model -> Browser.Document Msg
 view model =
@@ -96,14 +95,16 @@ view model =
       game model
 
 
-
 game : Model -> Browser.Document Msg
 game model =
   { title = "Number Sequence Game"
   , body =
-      [ text "The current URL is: "
-      , b [] [ text (Url.toString model.url) ]
-      , viewLink "/genesis" "Genesis of this game?"
+      [ section [class "section"]
+        [ div [ class "container"]
+          [ h1 [] [text "Number Sequence Game: Genesis"]
+          , viewLink "/genesis" "Genesis of this game?"
+          ]           
+        ]        
       ]
   }
 
@@ -111,10 +112,13 @@ genesisOfTheGame : Model -> Browser.Document Msg
 genesisOfTheGame model =
   { title = "Genesis"
   , body =
-      [ div [ class "container"]
-            [ h1 [] [text "Number Sequence Game: Genesis"]]     
-      , viewLink "/home" "Back to game"  
-      , videoframe          
+      [ section [ class "section"]
+        [ div [ class "container"]
+          [ h1 [] [text "Number Sequence Game: Genesis"]
+          , viewLink "/home" "Back to game"  
+          , videoframe          
+          ]     
+        ]
       ]
   }
 
