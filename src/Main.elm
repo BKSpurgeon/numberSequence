@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, text, div, h1, img, section, li, a, b, ul, iframe)
+import Html exposing (Html, text, div, h1, img, section, li, a, b, ul, iframe, p, br)
 import Html.Attributes exposing (src, class, href, width, height, property)
 import Url
 
@@ -115,8 +115,12 @@ genesisOfTheGame model =
       [ section [ class "section"]
         [ div [ class "container"]
           [ h1 [] [text "Number Sequence Game: Genesis"]
-          , viewLink "/home" "Back to game"  
+          , p [] [ text "After watching the following video, it dawned on me that chimps can beat humans (albeit with some training)!" ]
+          , p [] [text "Perhaps we can, in fact, be trained to beat chimps? Hence the genesis of this game. You can see the video below:"]            
           , videoframe          
+          , br [] []
+          , br [] []
+          , viewLink "/home" "Back to game"
           ]     
         ]
       ]
