@@ -1,0 +1,22 @@
+{
+  "main.css": "/numberSequence/static/css/main.7f457dfb.chunk.css",
+  "main.js": "/numberSequence/static/js/main.2d7288f3.chunk.js",
+  "main.js.map": "/numberSequence/static/js/main.2d7288f3.chunk.js.map",
+  "runtime~main.js": "/numberSequence/static/js/runtime~main.3e952f2e.js",
+  "runtime~main.js.map": "/numberSequence/static/js/runtime~main.3e952f2e.js.map",
+  "vendors~main.js": "/numberSequence/static/js/vendors~main.7aa09ec8.chunk.js",
+  "vendors~main.js.map": "/numberSequence/static/js/vendors~main.7aa09ec8.chunk.js.map",
+  "./service-worker.js": "/numberSequence/./service-worker.js",
+  "favicon.ico": "/numberSequence/favicon.ico",
+  "favicon_io/android-chrome-192x192.png": "/numberSequence/favicon_io/android-chrome-192x192.png",
+  "favicon_io/android-chrome-512x512.png": "/numberSequence/favicon_io/android-chrome-512x512.png",
+  "favicon_io/apple-touch-icon.png": "/numberSequence/favicon_io/apple-touch-icon.png",
+  "favicon_io/favicon-16x16.png": "/numberSequence/favicon_io/favicon-16x16.png",
+  "favicon_io/favicon-32x32.png": "/numberSequence/favicon_io/favicon-32x32.png",
+  "favicon_io/favicon.ico": "/numberSequence/favicon_io/favicon.ico",
+  "favicon_io/site.webmanifest": "/numberSequence/favicon_io/site.webmanifest",
+  "index.html": "/numberSequence/index.html",
+  "logo.svg": "/numberSequence/logo.svg",
+  "manifest.json": "/numberSequence/manifest.json",
+  "precache-manifest.24d838260d6ec60d4bc3b2f21513f860.js": "/numberSequence/precache-manifest.24d838260d6ec60d4bc3b2f21513f860.js"
+}
