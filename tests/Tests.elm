@@ -3,6 +3,7 @@ module Tests exposing (..)
 import Test exposing (..)
 import Expect
 
+import Main exposing (..)
 
 -- Check out https://package.elm-lang.org/packages/elm-explorations/test/latest to learn more about testing in Elm!
 
@@ -15,8 +16,13 @@ all =
                 Expect.equal 10 (3 + 7)
         , test "String.left" <|
             \_ ->
-                Expect.equal "a" (String.left 1 "abcdefg")
-        , test "This test should fail" <|
+                Expect.equal "a" (String.left 1 "abcdefg")       
+        ]
+
+initialValues : Test 
+initialValues = 
+     describe "initial Values"
+        [ test "Ending Number" <|
             \_ ->
-                Expect.fail "failed as expected!"
+                Expect.equal endingNumber 30
         ]
