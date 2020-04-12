@@ -86,28 +86,33 @@ subscriptions _ =
 -- VIEW
 view : Model -> Browser.Document Msg
 view model =
-    if model.url.path == "/home" then
+    case model.url.path of 
+    "/home" ->
         game model
-    else
-        explanationOfTheGame model
+
+    "/genesis" ->
+        genesisOfTheGame model
+    _ ->
+      game model
+
 
 
 game : Model -> Browser.Document Msg
 game model =
-  { title = "URL Interceptor"
+  { title = "Number Sequence Game"
   , body =
       [ text "The current URL is: "
       , b [] [ text (Url.toString model.url) ]
-      , viewLink "/explanation" "Genesis of this game?"
+      , viewLink "/genesis" "Genesis of this game?"
       ]
   }
 
-explanationOfTheGame : Model -> Browser.Document Msg
-explanationOfTheGame model =
+genesisOfTheGame : Model -> Browser.Document Msg
+genesisOfTheGame model =
   { title = "Genesis"
   , body =
       [ div [ class "container"]
-            [ h1 [] [text "Man vs Chimp"]]     
+            [ h1 [] [text "Number Sequence Game: Genesis"]]     
       , viewLink "/home" "Back to game"  
       , videoframe          
       ]
