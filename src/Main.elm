@@ -13,18 +13,6 @@ To do:
 -}
 ---- MODEL ----
 
-{-
-view : Model -> Html Msg
-view model =
-    section [] 
-            [ div [ class "container"]
-                  [ h1 [] [text "Man vs Chimp"]
-
-                  ]             
-            ]
-
-
--}
 
 
 -- MAIN
@@ -94,25 +82,35 @@ subscriptions _ =
 
 
 -- VIEW
-
-
 view : Model -> Browser.Document Msg
 view model =
+    if model.url.path == "/home" then
+        game model
+    else
+        explanationOfTheGame model
+
+
+game : Model -> Browser.Document Msg
+game model =
   { title = "URL Interceptor"
   , body =
       [ text "The current URL is: "
       , b [] [ text (Url.toString model.url) ]
-      , ul []
-          [ viewLink "/home"
-          , viewLink "/profile"
-          , viewLink "/reviews/the-century-of-the-self"
-          , viewLink "/reviews/public-opinion"
-          , viewLink "/reviews/shah-of-shahs"
-          ]
+      , viewLink "/explanation" "Genesis of this game?"
+      ]
+  }
+
+explanationOfTheGame : Model -> Browser.Document Msg
+explanationOfTheGame model =
+  { title = "Genesis"
+  , body =
+      [ div [ class "container"]
+            [ h1 [] [text "Man vs Chimp"]]     
+      , viewLink "/home" "Back to game"
       ]
   }
 
 
-viewLink : String -> Html msg
-viewLink path =
-  li [] [ a [ href path ] [ text path ] ]
+viewLink : String -> String -> Html msg
+viewLink path textAnnotation =
+  div [] [ a [ href path ] [ text textAnnotation ] ]
