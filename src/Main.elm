@@ -48,6 +48,11 @@ init flags url key =
 
 -- Initial Values functions
 
+type GameState =
+  Running
+  | NotRunning
+
+
 endingNumber : Int
 endingNumber = 30
 
@@ -111,10 +116,22 @@ game model =
             [ div [ class "container" ]
                 [ h1 [] [ text "Number Sequence Game: Genesis" ]
                 , viewLink "/genesis" "Genesis of this game?"
+                , br [] []
+                , showButtons
                 ]
             ]
         ]
     }
+
+
+showButtons : Html Msg
+showButtons = 
+  div [class "columns"]
+      [ div [class "column"]
+            [text "1"]
+      , div [class "column"]
+            [text "2" ]
+      ]
 
 
 genesisOfTheGame : Model -> Browser.Document Msg

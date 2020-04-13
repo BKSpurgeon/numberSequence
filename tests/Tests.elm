@@ -7,7 +7,8 @@ import Main exposing (..)
 
 -- Check out https://package.elm-lang.org/packages/elm-explorations/test/latest to learn more about testing in Elm!
 
-
+{-
+---- Elm Testing examples
 all : Test
 all =
     describe "A Test Suite"
@@ -18,6 +19,9 @@ all =
             \_ ->
                 Expect.equal "a" (String.left 1 "abcdefg")       
         ]
+
+
+-}
 
 initialValues : Test 
 initialValues = 
