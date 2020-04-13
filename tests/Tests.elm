@@ -26,7 +26,13 @@ all =
 initialValues : Test 
 initialValues = 
      describe "initial Values"
-        [ test "Ending Number" <|
+        [ test "Total Number" <|
             \_ ->
-                Expect.equal endingNumber 30
+                Expect.equal totalNumbers 30
+        , test "Starting number" <|
+            \_ ->
+                Expect.equal startingNumber 1
+       , test "Ending number" <|
+            \_ ->
+                Expect.equal endingNumber 10
         ]

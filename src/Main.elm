@@ -37,25 +37,31 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
+    , currentNumberToClick : Int -- i.e. if we need to click on 1, then the currentNumber to click will be 1
+    , gameState : GameState
     }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model key url, Cmd.none )
-
+    ( Model key url 1 BeforeStarting, Cmd.none)
 
 
 -- Initial Values functions
 
 type GameState =
-  Running
-  | NotRunning
+  BeforeStarting
+  | Running
 
+
+startingNumber : Int
+startingNumber = 1
 
 endingNumber : Int
-endingNumber = 30
+endingNumber = 10
 
+totalNumbers : Int
+totalNumbers = 30
 
 -- UPDATE
 
@@ -117,22 +123,37 @@ game model =
                 [ h1 [] [ text "Number Sequence Game: Genesis" ]
                 , viewLink "/genesis" "Genesis of this game?"
                 , br [] []
-                , showButtons
+                , showButtons model.gameState
                 ]
             ]
         ]
     }
 
 
-showButtons : Html Msg
-showButtons = 
+showButtons : GameState -> Html Msg
+showButtons gameState = 
   div [class "columns"]
-      [ div [class "column"]
-            [text "1"]
-      , div [class "column"]
-            [text "2" ]
-      ]
+      (List.map (\x -> showButton x gameState ) (List.range startingNumber totalNumbers))
 
+showButton : Int -> GameState -> Html Msg
+showButton numberOnButton gameState =  
+  let
+              displayTextOnButton = case gameState of
+                              BeforeStarting ->
+                                if numberOnButton <= endingNumber then
+                                    String.fromInt numberOnButton
+                                else 
+                                    ""
+                              _ ->
+                                if numberOnButton <= endingNumber then
+                                    "x"
+                                else 
+                                    ""
+                  
+          in
+
+  div [class "column"]
+      [text displayTextOnButton]
 
 genesisOfTheGame : Model -> Browser.Document Msg
 genesisOfTheGame model =
