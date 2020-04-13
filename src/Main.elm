@@ -2,8 +2,12 @@ module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, a, b, br, div, h1, iframe, img, li, p, section, text, ul)
+import Html exposing (Html, a, b, br, div, h1, iframe, img, li, p, section, text, ul, button)
 import Html.Attributes exposing (class, height, href, property, src, width)
+import Html.Events exposing (onClick)
+import Random
+import Random.List exposing (shuffle)
+import List exposing (take, drop, range)
 import Json.Encode
 import Url
 
@@ -39,12 +43,15 @@ type alias Model =
     , url : Url.Url
     , currentNumberToClick : Int -- i.e. if we need to click on 1, then the currentNumber to click will be 1
     , gameState : GameState
+    , numbers : List Int
     }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model key url 1 BeforeStarting, Cmd.none)
+    ( Model key url 1 BeforeStarting []
+    , Random.generate RandomizeNumbers (Random.List.shuffle (range startingNumber totalNumbers))
+    )
 
 
 -- Initial Values functions
@@ -69,11 +76,15 @@ totalNumbers = 30
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
+    | RandomizeNumbers  (List Int)
+    | NumberPressed Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        RandomizeNumbers numbers ->
+            ( { model | numbers = numbers }, Cmd.none )
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
@@ -86,6 +97,20 @@ update msg model =
             ( { model | url = url }
             , Cmd.none
             )
+        NumberPressed number ->
+            let
+                theGameHasStarted = if (number == startingNumber) && (model.gameState == BeforeStarting) then
+                                       True
+                                    else
+                                       False                    
+            in
+
+            if theGameHasStarted then
+                ( {model | gameState = Running
+                         , currentNumberToClick = (model.currentNumberToClick + 1)}
+                , Cmd.none )
+            else
+                (model, Cmd.none)
 
 
 
@@ -120,40 +145,73 @@ game model =
     , body =
         [ section [ class "section" ]
             [ div [ class "container" ]
-                [ h1 [] [ text "Number Sequence Game: Genesis" ]
-                , viewLink "/genesis" "Genesis of this game?"
+                [ h1 [] [ text "Number Sequence Game" ]                
                 , br [] []
-                , showButtons model.gameState
+                , instructions
+                , br [] [] 
+                , showButtons model
+                , br [] []
+                , viewLink "/genesis" "Genesis of this game?"
                 ]
             ]
         ]
     }
 
+instructions : Html Msg
+instructions = 
+    p [] [text ("Instructions: First memorise the numbers, then click from 1 to " ++ String.fromInt(endingNumber))  ]
 
-showButtons : GameState -> Html Msg
-showButtons gameState = 
-  div [class "columns"]
-      (List.map (\x -> showButton x gameState ) (List.range startingNumber totalNumbers))
+split : Int -> List a -> List (List a)
+split i list =
+    case take i list of
+        [] ->
+            []
 
-showButton : Int -> GameState -> Html Msg
-showButton numberOnButton gameState =  
+        listHead ->
+            listHead :: split i (drop i list)
+
+
+showButtons : Model -> Html Msg
+showButtons model = 
+    div [] ((split 6 <| model.numbers) |> List.map (\x -> showButtonRow model x))
+
+showButtonRow : Model -> List Int -> Html Msg
+showButtonRow model list = 
+  div [class "columns is-mobile is-gapless"]
+      (List.map (\x -> showButton model x) list)
+
+showButton : Model -> Int -> Html Msg
+showButton model numberOnButton =  
   let
-              displayTextOnButton = case gameState of
+              displayTextOnButton = case model.gameState of
                               BeforeStarting ->
                                 if numberOnButton <= endingNumber then
                                     String.fromInt numberOnButton
                                 else 
-                                    ""
+                                    "x"
                               _ ->
                                 if numberOnButton <= endingNumber then
-                                    "x"
+                                    ""
                                 else 
                                     ""
-                  
-          in
 
+              setButtonClass = case model.gameState of
+                                  BeforeStarting ->
+                                    if numberOnButton <= endingNumber then
+                                        "button is-primary is-large"
+                                    else 
+                                        "button is-large"
+                                  _ ->
+                                    if numberOnButton <= endingNumber then
+                                        "button is-primary is-large"
+                                    else 
+                                        "button is-large"
+                  
+  in
   div [class "column"]
-      [text displayTextOnButton]
+      [button [class setButtonClass, onClick (NumberPressed numberOnButton)] [text displayTextOnButton] 
+      ]
+
 
 genesisOfTheGame : Model -> Browser.Document Msg
 genesisOfTheGame model =
