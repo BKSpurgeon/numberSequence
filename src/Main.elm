@@ -59,6 +59,7 @@ init flags url key =
 type GameState =
   BeforeStarting
   | Running
+  | GameOver
 
 
 startingNumber : Int
@@ -78,6 +79,7 @@ type Msg
     | UrlChanged Url.Url
     | RandomizeNumbers  (List Int)
     | NumberPressed Int
+    | ResetLevel
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -103,15 +105,29 @@ update msg model =
                                        True
                                     else
                                        False                    
+                youClickedIncorrectly = if number /= model.currentNumberToClick then
+                                           True
+                                        else
+                                           False
             in
 
-            if theGameHasStarted then
-                ( {model | gameState = Running
-                         , currentNumberToClick = (model.currentNumberToClick + 1)}
-                , Cmd.none )
-            else
-                (model, Cmd.none)
-
+            case model.gameState of
+                BeforeStarting ->
+                    if theGameHasStarted then
+                        ( {model | gameState = Running
+                                 , currentNumberToClick = (model.currentNumberToClick + 1)}
+                        , Cmd.none )
+                    else
+                        (model, Cmd.none)
+                Running ->
+                    if youClickedIncorrectly then
+                        ({model | gameState = GameOver, currentNumberToClick = (model.currentNumberToClick + 1) }, Cmd.none)
+                    else 
+                        (model, Cmd.none)
+                GameOver ->
+                    (model, Cmd.none)
+        ResetLevel ->
+            ({model | gameState = BeforeStarting, currentNumberToClick = startingNumber}, Cmd.none)
 
 
 -- SUBSCRIPTIONS
@@ -151,6 +167,10 @@ game model =
                 , br [] [] 
                 , showButtons model
                 , br [] []
+                , if model.gameState == GameOver then
+                    button [class "button is-info", onClick ResetLevel] [ text "Reset Button"]
+                  else 
+                    div [] []
                 , viewLink "/genesis" "Genesis of this game?"
                 ]
             ]
@@ -189,11 +209,16 @@ showButton model numberOnButton =
                                     String.fromInt numberOnButton
                                 else 
                                     "x"
-                              _ ->
+                              Running ->
                                 if numberOnButton <= endingNumber then
                                     ""
                                 else 
                                     ""
+                              GameOver ->
+                                 if numberOnButton <= endingNumber then
+                                    String.fromInt numberOnButton
+                                 else 
+                                    "x"
 
               setButtonClass = case model.gameState of
                                   BeforeStarting ->
@@ -201,12 +226,18 @@ showButton model numberOnButton =
                                         "button is-primary is-large"
                                     else 
                                         "button is-large"
-                                  _ ->
+                                  Running ->
                                     if numberOnButton <= endingNumber then
                                         "button is-primary is-large"
                                     else 
                                         "button is-large"
-                  
+                                  GameOver -> 
+                                    if numberOnButton <= endingNumber then
+                                        "button is-primary is-large"
+                                    else 
+                                        "button is-danger is-large"
+                                    
+
   in
   div [class "column"]
       [button [class setButtonClass, onClick (NumberPressed numberOnButton)] [text displayTextOnButton] 
