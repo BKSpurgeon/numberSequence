@@ -42,6 +42,7 @@ type alias Model =
     { key : Nav.Key
     , url : Url.Url
     , currentNumberToClick : Int -- i.e. if we need to click on 1, then the currentNumber to click will be 1
+    , endingNumber : Int
     , gameState : GameState
     , numbers : List Int
     }
@@ -49,8 +50,8 @@ type alias Model =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model key url 1 BeforeStarting []
-    , Random.generate RandomizeNumbers (Random.List.shuffle (range startingNumber totalNumbers))
+    ( Model key url 1 3 BeforeStarting []
+    , randomiseNumbers 
     )
 
 
@@ -64,9 +65,6 @@ type GameState =
 
 startingNumber : Int
 startingNumber = 1
-
-endingNumber : Int
-endingNumber = 10
 
 totalNumbers : Int
 totalNumbers = 30
@@ -109,6 +107,12 @@ update msg model =
                                            True
                                         else
                                            False
+                levelIsFinished = if number == model.currentNumberToClick && number == model.endingNumber then
+                                        True
+                                    else
+                                        False
+
+
             in
 
             case model.gameState of
@@ -121,9 +125,14 @@ update msg model =
                         (model, Cmd.none)
                 Running ->
                     if youClickedIncorrectly then
-                        ({model | gameState = GameOver, currentNumberToClick = (model.currentNumberToClick + 1) }, Cmd.none)
-                    else 
-                        (model, Cmd.none)
+                        ({model | gameState = GameOver }, Cmd.none)
+                    else if levelIsFinished then
+                        ({model | gameState = BeforeStarting
+                                , currentNumberToClick = 1
+                                , endingNumber = model.endingNumber + 1}
+                                , randomiseNumbers)
+                    else
+                        ({model| currentNumberToClick = (model.currentNumberToClick + 1)}, Cmd.none)
                 GameOver ->
                     (model, Cmd.none)
         ResetLevel ->
@@ -163,7 +172,7 @@ game model =
             [ div [ class "container" ]
                 [ h1 [] [ text "Number Sequence Game" ]                
                 , br [] []
-                , instructions
+                , instructions model.endingNumber
                 , br [] [] 
                 , showButtons model
                 , br [] []
@@ -177,8 +186,8 @@ game model =
         ]
     }
 
-instructions : Html Msg
-instructions = 
+instructions : Int -> Html Msg
+instructions endingNumber = 
     p [] [text ("Instructions: First memorise the numbers, then click from 1 to " ++ String.fromInt(endingNumber))  ]
 
 split : Int -> List a -> List (List a)
@@ -205,34 +214,34 @@ showButton model numberOnButton =
   let
               displayTextOnButton = case model.gameState of
                               BeforeStarting ->
-                                if numberOnButton <= endingNumber then
+                                if numberOnButton <= model.endingNumber then
                                     String.fromInt numberOnButton
                                 else 
                                     "x"
                               Running ->
-                                if numberOnButton <= endingNumber then
+                                if numberOnButton <= model.endingNumber then
                                     ""
                                 else 
                                     ""
                               GameOver ->
-                                 if numberOnButton <= endingNumber then
+                                 if numberOnButton <= model.endingNumber then
                                     String.fromInt numberOnButton
                                  else 
                                     "x"
 
               setButtonClass = case model.gameState of
                                   BeforeStarting ->
-                                    if numberOnButton <= endingNumber then
+                                    if numberOnButton <= model.endingNumber then
                                         "button is-primary is-large"
                                     else 
                                         "button is-large"
                                   Running ->
-                                    if numberOnButton <= endingNumber then
+                                    if numberOnButton <= model.endingNumber then
                                         "button is-primary is-large"
                                     else 
                                         "button is-large"
                                   GameOver -> 
-                                    if numberOnButton <= endingNumber then
+                                    if numberOnButton <= model.endingNumber then
                                         "button is-primary is-large"
                                     else 
                                         "button is-danger is-large"
@@ -278,6 +287,9 @@ videoframe =
         ]
         []
 
-
+-- Commands
+randomiseNumbers : Cmd Msg
+randomiseNumbers =
+   Random.generate RandomizeNumbers (Random.List.shuffle (range startingNumber totalNumbers))
 
 {- , property "allow" (Json.Encode.string "accelerometer; gyroscope; picture-in-picture") -}
