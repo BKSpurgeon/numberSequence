@@ -3,7 +3,7 @@ module Main exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html, a, b, br, div, h1, iframe, img, li, p, section, text, ul, button)
-import Html.Attributes exposing (class, height, href, property, src, width)
+import Html.Attributes exposing (class, height, href, property, src, width, disabled)
 import Html.Events exposing (onClick)
 import Random
 import Random.List exposing (shuffle)
@@ -80,10 +80,17 @@ type Msg
     | RandomizeNumbers  (List Int)
     | NumberPressed Int
     | ResetLevel
+    | NextLevel
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        proceedToNextLevel = ({model | gameState = BeforeStarting
+                                        , currentNumberToClick = 1
+                                        , endingNumber = model.endingNumber + 1}, randomiseNumbers)
+            
+    in        
     case msg of
         RandomizeNumbers numbers ->
             ( { model | numbers = numbers }, Cmd.none )
@@ -105,16 +112,14 @@ update msg model =
                                        True
                                     else
                                        False                    
-                youClickedIncorrectly = if number /= model.currentNumberToClick then
+                youClickedIncorrectly = if number /= model.currentNumberToClick && number <= model.endingNumber then
                                            True
                                         else
                                            False
                 levelIsFinished = if number == model.currentNumberToClick && number == model.endingNumber then
                                         True
                                     else
-                                        False
-
-
+                                        False                
             in
 
             case model.gameState of
@@ -133,14 +138,13 @@ update msg model =
                     else
                         ({model| currentNumberToClick = (model.currentNumberToClick + 1)}, Cmd.none)
                 Win ->
-                     ({model | gameState = BeforeStarting
-                                , currentNumberToClick = 1
-                                , endingNumber = model.endingNumber + 1}
-                                , randomiseNumbers)
+                     proceedToNextLevel
                 Lose ->
                     ({model | currentNumberToClick = startingNumber, gameState = BeforeStarting }, Cmd.none)
         ResetLevel ->
             ({model | gameState = BeforeStarting, currentNumberToClick = startingNumber}, Cmd.none)
+        NextLevel ->
+            proceedToNextLevel
 
 
 -- SUBSCRIPTIONS
@@ -180,15 +184,22 @@ game model =
                 , br [] [] 
                 , showButtons model
                 , br [] []
-                , if model.gameState == Lose then
-                    button [class "button is-info", onClick ResetLevel] [ text "Reset Button"]
-                  else 
-                    div [] []
+                , gameButtonOptions model
                 , viewLink "/genesis" "Genesis of this game?"
                 ]
             ]
         ]
     }
+
+gameButtonOptions : Model -> Html Msg
+gameButtonOptions model =
+    case model.gameState of
+        Lose ->
+            button [class "button is-info", onClick ResetLevel] [ text "Reset Game"]
+        Win ->
+            button [class "button is-info", onClick NextLevel] [ text "Go to the next level!"]
+        _ ->
+            div [] []
 
 instructions : Model -> Html Msg
 instructions model = 
@@ -198,7 +209,7 @@ instructions model =
         Running ->
           p [] []
         Win ->
-          p [] [text ("Congrats! Let's progress to level " ++ String.fromInt model.endingNumber)]
+          p [class "notification is-success is-light"] [text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1))]
         Lose ->
           p [] [text "Oh no! Wanna try again?" ]
 
@@ -267,9 +278,7 @@ showButton model numberOnButton =
                                     if numberOnButton <= model.endingNumber then
                                         "button is-primary is-large"
                                     else 
-                                        "button is-success is-large"
-                                    
-
+                                        "button is-large"
   in
   div [class "column"]
       [button [class setButtonClass, onClick (NumberPressed numberOnButton)] [text displayTextOnButton] 
