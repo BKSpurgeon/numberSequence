@@ -60,7 +60,9 @@ init flags url key =
 type GameState =
   BeforeStarting
   | Running
-  | GameOver
+  | Lose
+  | Win
+
 
 
 startingNumber : Int
@@ -125,16 +127,18 @@ update msg model =
                         (model, Cmd.none)
                 Running ->
                     if youClickedIncorrectly then
-                        ({model | gameState = GameOver }, Cmd.none)
+                        ({model | gameState = Lose }, Cmd.none)
                     else if levelIsFinished then
-                        ({model | gameState = BeforeStarting
+                        ({model | gameState = Win}, Cmd.none)
+                    else
+                        ({model| currentNumberToClick = (model.currentNumberToClick + 1)}, Cmd.none)
+                Win ->
+                     ({model | gameState = BeforeStarting
                                 , currentNumberToClick = 1
                                 , endingNumber = model.endingNumber + 1}
                                 , randomiseNumbers)
-                    else
-                        ({model| currentNumberToClick = (model.currentNumberToClick + 1)}, Cmd.none)
-                GameOver ->
-                    (model, Cmd.none)
+                Lose ->
+                    ({model | currentNumberToClick = startingNumber, gameState = BeforeStarting }, Cmd.none)
         ResetLevel ->
             ({model | gameState = BeforeStarting, currentNumberToClick = startingNumber}, Cmd.none)
 
@@ -172,11 +176,11 @@ game model =
             [ div [ class "container" ]
                 [ h1 [] [ text "Number Sequence Game" ]                
                 , br [] []
-                , instructions model.endingNumber
+                , instructions model
                 , br [] [] 
                 , showButtons model
                 , br [] []
-                , if model.gameState == GameOver then
+                , if model.gameState == Lose then
                     button [class "button is-info", onClick ResetLevel] [ text "Reset Button"]
                   else 
                     div [] []
@@ -186,9 +190,18 @@ game model =
         ]
     }
 
-instructions : Int -> Html Msg
-instructions endingNumber = 
-    p [] [text ("Instructions: First memorise the numbers, then click from 1 to " ++ String.fromInt(endingNumber))  ]
+instructions : Model -> Html Msg
+instructions model = 
+    case model.gameState of
+        BeforeStarting ->
+          p [] [text ("Instructions: Memorise the number positions, then click from 1 to " ++ String.fromInt(model.endingNumber))  ]
+        Running ->
+          p [] []
+        Win ->
+          p [] [text ("Congrats! Let's progress to level " ++ String.fromInt model.endingNumber)]
+        Lose ->
+          p [] [text "Oh no! Wanna try again?" ]
+
 
 split : Int -> List a -> List (List a)
 split i list =
@@ -223,10 +236,15 @@ showButton model numberOnButton =
                                     ""
                                 else 
                                     ""
-                              GameOver ->
+                              Lose ->
                                  if numberOnButton <= model.endingNumber then
                                     String.fromInt numberOnButton
                                  else 
+                                    "x"
+                              Win ->
+                                if numberOnButton <= model.endingNumber then
+                                    String.fromInt numberOnButton
+                                else 
                                     "x"
 
               setButtonClass = case model.gameState of
@@ -240,11 +258,16 @@ showButton model numberOnButton =
                                         "button is-primary is-large"
                                     else 
                                         "button is-large"
-                                  GameOver -> 
+                                  Lose -> 
                                     if numberOnButton <= model.endingNumber then
                                         "button is-primary is-large"
                                     else 
                                         "button is-danger is-large"
+                                  Win ->
+                                    if numberOnButton <= model.endingNumber then
+                                        "button is-primary is-large"
+                                    else 
+                                        "button is-success is-large"
                                     
 
   in
