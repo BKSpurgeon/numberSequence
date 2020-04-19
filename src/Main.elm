@@ -291,9 +291,9 @@ showButton model numberOnButton =
                                     "x"
                               Running ->
                                 if numberOnButton <= model.endingNumber then
-                                    ""
+                                    "x"
                                 else 
-                                    ""
+                                    "x"
                               Lose ->
                                  if numberOnButton <= model.endingNumber then
                                     String.fromInt numberOnButton
