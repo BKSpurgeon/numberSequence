@@ -354,8 +354,10 @@ genesisOfTheGame model =
         [ section [ class "section" ]
             [ div [ class "container" ]
                 [ h1 [] [ text "Number Sequence Game: Genesis" ]
-                , p [] [ text "After watching the following video, it dawned on me: are chimps smarter than humans at memorising number positions?" ]
-                , p [] [ text "To redress this travesty, I created this game: perhaps after a couple of hours of intense training, we can outwit this cheeky monkey. Yes sir: nobody's gonna make a money out of me! (Do check out the video: it's quite cool!)" ]
+                , p [class "has-text-left"] [ text "After watching the following video, it dawned on me: are chimps smarter than humans at memorising number positions?" ]
+                , br [] []
+                , p [class "has-text-left"] [ text "To redress this travesty, I created this game: perhaps after a couple of hours of intense training, we can outwit this cheeky monkey. Yes sir: nobody's gonna make a monkey out of me! (Do check out the video: it's quite cool!)" ]
+                , br [] []
                 , videoframe
                 , br [] []
                 , br [] []
