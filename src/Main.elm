@@ -39,6 +39,7 @@ type alias Model =
     { key : Nav.Key
     , url : Url.Url
     , currentNumberToClick : Int -- i.e. if we need to click on 1, then the currentNumber to click will be 1
+    , numberClicked : Int
     , endingNumber : Int
     , gameState : GameState
     , numbers : List Int
@@ -47,7 +48,7 @@ type alias Model =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model key url 1 3 BeforeStarting []
+    ( Model key url 1 0 3 BeforeStarting []
     , randomiseNumbers 
     )
 
@@ -92,6 +93,7 @@ update msg model =
 
         proceedToNextLevel = ({model | gameState = BeforeStarting
                                         , currentNumberToClick = 1
+                                        , numberClicked = 0
                                         , endingNumber = getFinalLevelNumber}, randomiseNumbers)
             
     in        
@@ -130,23 +132,25 @@ update msg model =
                 BeforeStarting ->
                     if theGameHasStarted then
                         ( {model | gameState = Running
-                                 , currentNumberToClick = (model.currentNumberToClick + 1)}
+                                 , currentNumberToClick = (model.currentNumberToClick + 1)
+                                 , numberClicked = number
+                           }
                         , Cmd.none )
                     else
                         (model, Cmd.none)
                 Running ->
                     if youClickedIncorrectly then
-                        ({model | gameState = Lose }, Cmd.none)
+                        ({model | gameState = Lose, numberClicked = number }, Cmd.none)
                     else if levelIsFinished then
-                        ({model | gameState = Win}, Cmd.none)
+                        ({model | gameState = Win, numberClicked = number}, Cmd.none)
                     else
-                        ({model| currentNumberToClick = (model.currentNumberToClick + 1)}, Cmd.none)
+                        ({model| currentNumberToClick = (model.currentNumberToClick + 1), numberClicked = number}, Cmd.none)
                 Win ->
                      proceedToNextLevel
                 Lose ->
-                    ({model | currentNumberToClick = startingNumber, gameState = BeforeStarting }, Cmd.none)
+                    ({model | currentNumberToClick = startingNumber, gameState = BeforeStarting, numberClicked = number }, Cmd.none)
         ResetLevel ->
-            ({model | gameState = BeforeStarting, currentNumberToClick = startingNumber}, Cmd.none)
+            ({model | gameState = BeforeStarting, currentNumberToClick = startingNumber, numberClicked = 0}, Cmd.none)
         NextLevel ->
             proceedToNextLevel
         PreviousLevel ->
@@ -158,8 +162,11 @@ update msg model =
             in
                 
             ({model | gameState = BeforeStarting
-                                        , currentNumberToClick = 1
-                                        , endingNumber = previousLevelNumber}, randomiseNumbers)
+                    , currentNumberToClick = 1
+                    , endingNumber = previousLevelNumber
+                    , numberClicked = 0
+              }
+            , randomiseNumbers)
 
 
 
@@ -307,25 +314,33 @@ showButton model numberOnButton =
 
               setButtonClass = case model.gameState of
                                   BeforeStarting ->
-                                    if numberOnButton <= model.endingNumber then
-                                        "button is-primary is-large"
+                                    if numberOnButton == model.numberClicked then
+                                        "button is-info is-small"
+                                    else if numberOnButton <= model.endingNumber then
+                                        "button is-primary is-small"
                                     else 
-                                        "button is-large"
+                                        "button is-small"
                                   Running ->
-                                    if numberOnButton <= model.endingNumber then
-                                        "button is-primary is-large"
+                                    if numberOnButton == model.numberClicked then
+                                        "button is-info is-small"
+                                    else if numberOnButton <= model.endingNumber then
+                                        "button is-primary is-small"
                                     else 
-                                        "button is-large"
+                                        "button is-small"
                                   Lose -> 
-                                    if numberOnButton <= model.endingNumber then
-                                        "button is-primary is-large"
+                                    if numberOnButton == model.numberClicked then
+                                        "button is-info is-small"
+                                    else if numberOnButton <= model.endingNumber then
+                                        "button is-primary is-small"
                                     else 
-                                        "button is-danger is-large"
+                                        "button is-danger is-small"
                                   Win ->
-                                    if numberOnButton <= model.endingNumber then
-                                        "button is-primary is-large"
+                                    if numberOnButton == model.numberClicked then
+                                        "button is-info is-small"
+                                    else if numberOnButton <= model.endingNumber then
+                                        "button is-primary is-small"
                                     else 
-                                        "button is-large"
+                                        "button is-small"
   in
   div [class "column"]
       [button [class setButtonClass, onClick (NumberPressed numberOnButton)] [text displayTextOnButton] 
