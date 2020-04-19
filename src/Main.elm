@@ -2,13 +2,13 @@ module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, a, b, br, div, h1, iframe, img, li, p, section, text, ul, button)
-import Html.Attributes exposing (class, height, href, property, src, width, disabled)
+import Html exposing (Html, a, b, br, button, div, h1, iframe, img, li, p, section, text, ul)
+import Html.Attributes exposing (class, disabled, height, href, property, src, width)
 import Html.Events exposing (onClick)
+import Json.Encode
+import List exposing (drop, range, take)
 import Random
 import Random.List exposing (shuffle)
-import List exposing (take, drop, range)
-import Json.Encode
 import Url
 
 
@@ -33,7 +33,10 @@ main =
         , onUrlRequest = LinkClicked
         }
 
+
+
 -- MODEL
+
 
 type alias Model =
     { key : Nav.Key
@@ -49,25 +52,31 @@ type alias Model =
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     ( Model key url 1 0 3 BeforeStarting []
-    , randomiseNumbers 
+    , randomiseNumbers
     )
+
 
 
 -- Initial Values functions
 
-type GameState =
-  BeforeStarting
-  | Running
-  | Lose
-  | Win
 
+type GameState
+    = BeforeStarting
+    | Running
+    | Lose
+    | Win
 
 
 startingNumber : Int
-startingNumber = 1
+startingNumber =
+    1
+
 
 totalNumbers : Int
-totalNumbers = 30
+totalNumbers =
+    30
+
+
 
 -- UPDATE
 
@@ -75,7 +84,7 @@ totalNumbers = 30
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
-    | RandomizeNumbers  (List Int)
+    | RandomizeNumbers (List Int)
     | NumberPressed Int
     | ResetLevel
     | NextLevel
@@ -85,21 +94,28 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        getFinalLevelNumber = case (List.minimum [model.endingNumber + 1, totalNumbers]) of
-             Just finalLevel ->
-                 finalLevel
-             Nothing ->
-                 totalNumbers
+        getFinalLevelNumber =
+            case List.minimum [ model.endingNumber + 1, totalNumbers ] of
+                Just finalLevel ->
+                    finalLevel
 
-        proceedToNextLevel = ({model | gameState = BeforeStarting
-                                        , currentNumberToClick = 1
-                                        , numberClicked = 0
-                                        , endingNumber = getFinalLevelNumber}, randomiseNumbers)
-            
-    in        
+                Nothing ->
+                    totalNumbers
+
+        proceedToNextLevel =
+            ( { model
+                | gameState = BeforeStarting
+                , currentNumberToClick = 1
+                , numberClicked = 0
+                , endingNumber = getFinalLevelNumber
+              }
+            , randomiseNumbers
+            )
+    in
     case msg of
         RandomizeNumbers numbers ->
             ( { model | numbers = numbers }, Cmd.none )
+
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
@@ -108,65 +124,87 @@ update msg model =
                 Browser.External href ->
                     ( model, Nav.load href )
 
-        UrlChanged url ->          
+        UrlChanged url ->
             ( { model | url = url }
             , Cmd.none
             )
+
         NumberPressed number ->
             let
-                theGameHasStarted = if (number == startingNumber) && (model.gameState == BeforeStarting) then
-                                       True
-                                    else
-                                       False                    
-                youClickedIncorrectly = if number /= model.currentNumberToClick && number <= model.endingNumber then
-                                           True
-                                        else
-                                           False
-                levelIsFinished = if number == model.currentNumberToClick && number == model.endingNumber then
-                                        True
-                                    else
-                                        False                
-            in
+                theGameHasStarted =
+                    if (number == startingNumber) && (model.gameState == BeforeStarting) then
+                        True
 
+                    else
+                        False
+
+                youClickedIncorrectly =
+                    if number /= model.currentNumberToClick && number <= model.endingNumber then
+                        True
+
+                    else
+                        False
+
+                levelIsFinished =
+                    if number == model.currentNumberToClick && number == model.endingNumber then
+                        True
+
+                    else
+                        False
+            in
             case model.gameState of
                 BeforeStarting ->
                     if theGameHasStarted then
-                        ( {model | gameState = Running
-                                 , currentNumberToClick = (model.currentNumberToClick + 1)
-                                 , numberClicked = number
-                           }
-                        , Cmd.none )
+                        ( { model
+                            | gameState = Running
+                            , currentNumberToClick = model.currentNumberToClick + 1
+                            , numberClicked = number
+                          }
+                        , Cmd.none
+                        )
+
                     else
-                        (model, Cmd.none)
+                        ( model, Cmd.none )
+
                 Running ->
                     if youClickedIncorrectly then
-                        ({model | gameState = Lose, numberClicked = number }, Cmd.none)
+                        ( { model | gameState = Lose, numberClicked = number }, Cmd.none )
+
                     else if levelIsFinished then
-                        ({model | gameState = Win, numberClicked = number}, Cmd.none)
+                        ( { model | gameState = Win, numberClicked = number }, Cmd.none )
+
                     else
-                        ({model| currentNumberToClick = (model.currentNumberToClick + 1), numberClicked = number}, Cmd.none)
+                        ( { model | currentNumberToClick = model.currentNumberToClick + 1, numberClicked = number }, Cmd.none )
+
                 Win ->
-                     proceedToNextLevel
+                    proceedToNextLevel
+
                 Lose ->
-                    ({model | currentNumberToClick = startingNumber, gameState = BeforeStarting, numberClicked = number }, Cmd.none)
+                    ( { model | currentNumberToClick = startingNumber, gameState = BeforeStarting, numberClicked = number }, Cmd.none )
+
         ResetLevel ->
-            ({model | gameState = BeforeStarting, currentNumberToClick = startingNumber, numberClicked = 0}, Cmd.none)
+            ( { model | gameState = BeforeStarting, currentNumberToClick = startingNumber, numberClicked = 0 }, Cmd.none )
+
         NextLevel ->
             proceedToNextLevel
+
         PreviousLevel ->
             let
-                previousLevelNumber = if (model.endingNumber - 1) >= (startingNumber + 1) then
-                                         (model.endingNumber - 1)
-                                      else 
-                                         startingNumber + 1
+                previousLevelNumber =
+                    if (model.endingNumber - 1) >= (startingNumber + 1) then
+                        model.endingNumber - 1
+
+                    else
+                        startingNumber + 1
             in
-                
-            ({model | gameState = BeforeStarting
-                    , currentNumberToClick = 1
-                    , endingNumber = previousLevelNumber
-                    , numberClicked = 0
+            ( { model
+                | gameState = BeforeStarting
+                , currentNumberToClick = 1
+                , endingNumber = previousLevelNumber
+                , numberClicked = 0
               }
-            , randomiseNumbers)
+            , randomiseNumbers
+            )
 
 
 
@@ -197,20 +235,19 @@ view model =
 
 debugger : Model -> Browser.Document Msg
 debugger model =
-  { title = "URL Interceptor"
-  , body =
-      [ text "The current URL is: "
-      , b [] [ text (Url.toString model.url) ]
-      , ul []
-          [ viewLink "/home" "home"
-          , viewLink "/profile" "profile"
-          , viewLink "/reviews/the-century-of-the-self"  "/reviews/the-century-of-the-self" 
-          , viewLink "/reviews/public-opinion" "/reviews/public-opinion"
-          , viewLink "/reviews/shah-of-shahs" "/reviews/shah-of-shahs"
-          ]
-      ]
-  }
-
+    { title = "URL Interceptor"
+    , body =
+        [ text "The current URL is: "
+        , b [] [ text (Url.toString model.url) ]
+        , ul []
+            [ viewLink "/home" "home"
+            , viewLink "/profile" "profile"
+            , viewLink "/reviews/the-century-of-the-self" "/reviews/the-century-of-the-self"
+            , viewLink "/reviews/public-opinion" "/reviews/public-opinion"
+            , viewLink "/reviews/shah-of-shahs" "/reviews/shah-of-shahs"
+            ]
+        ]
+    }
 
 
 game : Model -> Browser.Document Msg
@@ -218,54 +255,63 @@ game model =
     { title = "Number Sequence Game"
     , body =
         [ section [ class "section" ]
-                  [ div [ class "container" ]
-                    [ h1 [] [ text "Number Sequence Game" ]                
-                    , br [] []
-                    , instructions model
-                    , br [] []                  
-                    , showButtons model
-                    , br [] []
-                    , gameButtonOptions model
-                    , br [] []
-                    , gameSettingsLinks model
-                    , br [] []
-                    , viewLink "/numberSequence/genesis" "Genesis of this game?"
-                    ]
-                  ]
+            [ div [ class "container" ]
+                [ h1 [] [ text "Number Sequence Game" ]
+                , br [] []
+                , instructions model
+                , br [] []
+                , showButtons model
+                , br [] []
+                , gameButtonOptions model
+                , br [] []
+                , gameSettingsLinks model
+                , br [] []
+                , viewLink "/numberSequence/genesis" "Genesis of this game?"
+                ]
+            ]
         ]
     }
+
 
 gameSettingsLinks : Model -> Html Msg
 gameSettingsLinks model =
     if model.gameState == Lose || model.gameState == Win then
-      div [] []
+        div [] []
+
     else
-    div []
-        [ button [class "button is-link is-light", onClick PreviousLevel][ text "< Previous "]
-        , button [class "button is-link is-light", onClick NextLevel][ text "Next >"]
-        ]
+        div []
+            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous " ]
+            , button [ class "button is-link is-light", onClick NextLevel ] [ text "Next >" ]
+            ]
+
 
 gameButtonOptions : Model -> Html Msg
 gameButtonOptions model =
     case model.gameState of
         Lose ->
-            button [class "button is-info", onClick ResetLevel] [ text "Reset Game"]
+            button [ class "button is-info", onClick ResetLevel ] [ text "Reset Game" ]
+
         Win ->
-            button [class "button is-info", onClick NextLevel] [ text "Go to the next level!"]
+            button [ class "button is-info", onClick NextLevel ] [ text "Go to the next level!" ]
+
         _ ->
             div [] []
 
+
 instructions : Model -> Html Msg
-instructions model = 
+instructions model =
     case model.gameState of
         BeforeStarting ->
-          p [] [text ("Instructions: Memorise the number positions, then click from 1 to " ++ String.fromInt(model.endingNumber))  ]
+            p [] [ text ("Instructions: Memorise the number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
+
         Running ->
-          p [] []
+            p [] []
+
         Win ->
-          p [class "notification is-success is-light"] [text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1))]
+            p [ class "notification is-success is-light" ] [ text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1)) ]
+
         Lose ->
-          p [] [text "Oh no! Wanna try again?" ]
+            p [] [ text "Oh no! Wanna try again?" ]
 
 
 split : Int -> List a -> List (List a)
@@ -279,72 +325,94 @@ split i list =
 
 
 showButtons : Model -> Html Msg
-showButtons model = 
+showButtons model =
     div [] ((split 6 <| model.numbers) |> List.map (\x -> showButtonRow model x))
 
+
 showButtonRow : Model -> List Int -> Html Msg
-showButtonRow model list = 
-  div [class "columns is-mobile is-gapless"]
-      (List.map (\x -> showButton model x) list)
+showButtonRow model list =
+    div [ class "columns is-mobile is-gapless" ]
+        (List.map (\x -> showButton model x) list)
+
 
 showButton : Model -> Int -> Html Msg
-showButton model numberOnButton =  
-  let
-              displayTextOnButton = case model.gameState of
-                              BeforeStarting ->
-                                if numberOnButton <= model.endingNumber then
-                                    String.fromInt numberOnButton
-                                else 
-                                    "x"
-                              Running ->
-                                if numberOnButton <= model.endingNumber then
-                                    "x"
-                                else 
-                                    "x"
-                              Lose ->
-                                 if numberOnButton <= model.endingNumber then
-                                    String.fromInt numberOnButton
-                                 else 
-                                    "x"
-                              Win ->
-                                if numberOnButton <= model.endingNumber then
-                                    String.fromInt numberOnButton
-                                else 
-                                    "x"
+showButton model numberOnButton =
+    let
+        displayTextOnButton =
+            case model.gameState of
+                BeforeStarting ->
+                    if numberOnButton <= model.endingNumber then
+                        String.fromInt numberOnButton
 
-              setButtonClass = case model.gameState of
-                                  BeforeStarting ->
-                                    if numberOnButton == model.numberClicked then
-                                        "button is-info is-small"
-                                    else if numberOnButton <= model.endingNumber then
-                                        "button is-primary is-small"
-                                    else 
-                                        "button is-small"
-                                  Running ->
-                                    if numberOnButton == model.numberClicked then
-                                        "button is-info is-small"
-                                    else if numberOnButton <= model.endingNumber then
-                                        "button is-primary is-small"
-                                    else 
-                                        "button is-small"
-                                  Lose -> 
-                                    if numberOnButton == model.numberClicked then
-                                        "button is-info is-small"
-                                    else if numberOnButton <= model.endingNumber then
-                                        "button is-primary is-small"
-                                    else 
-                                        "button is-danger is-small"
-                                  Win ->
-                                    if numberOnButton == model.numberClicked then
-                                        "button is-info is-small"
-                                    else if numberOnButton <= model.endingNumber then
-                                        "button is-primary is-small"
-                                    else 
-                                        "button is-small"
-  in
-  div [class "column"]
-      [button [class setButtonClass, onClick (NumberPressed numberOnButton)] [text displayTextOnButton] 
-      ]
+                    else
+                        "x"
+
+                Running ->
+                    if numberOnButton <= model.endingNumber then
+                        "x"
+
+                    else
+                        "x"
+
+                Lose ->
+                    if numberOnButton <= model.endingNumber then
+                        String.fromInt numberOnButton
+
+                    else
+                        "x"
+
+                Win ->
+                    if numberOnButton <= model.endingNumber then
+                        String.fromInt numberOnButton
+
+                    else
+                        "x"
+
+        setButtonClass =
+            case model.gameState of
+                BeforeStarting ->
+                    if numberOnButton == model.numberClicked then
+                        "button is-info is-small"
+
+                    else if numberOnButton <= model.endingNumber then
+                        "button is-primary is-small"
+
+                    else
+                        "button is-small"
+
+                Running ->
+                    if numberOnButton == model.numberClicked then
+                        "button is-info is-small"
+
+                    else if numberOnButton <= model.endingNumber then
+                        "button is-primary is-small"
+
+                    else
+                        "button is-small"
+
+                Lose ->
+                    if numberOnButton == model.numberClicked then
+                        "button is-info is-small"
+
+                    else if numberOnButton <= model.endingNumber then
+                        "button is-primary is-small"
+
+                    else
+                        "button is-danger is-small"
+
+                Win ->
+                    if numberOnButton == model.numberClicked then
+                        "button is-info is-small"
+
+                    else if numberOnButton <= model.endingNumber then
+                        "button is-primary is-small"
+
+                    else
+                        "button is-small"
+    in
+    div [ class "column" ]
+        [ button [ class setButtonClass, onClick (NumberPressed numberOnButton) ] [ text displayTextOnButton ]
+        ]
 
 
 genesisOfTheGame : Model -> Browser.Document Msg
@@ -354,9 +422,9 @@ genesisOfTheGame model =
         [ section [ class "section" ]
             [ div [ class "container" ]
                 [ h1 [] [ text "Number Sequence Game: Genesis" ]
-                , p [class "has-text-left"] [ text "After watching the following video, it dawned on me: are chimps smarter than humans at memorising number positions?" ]
+                , p [ class "has-text-left" ] [ text "After watching the following video, it dawned on me: are chimps smarter than humans at memorising number positions?" ]
                 , br [] []
-                , p [class "has-text-left"] [ text "To redress this travesty, I created this game: perhaps after a couple of hours of intense training, we can outwit this cheeky monkey. Yes sir: nobody's gonna make a monkey out of me! (Do check out the video: it's quite cool!)" ]
+                , p [ class "has-text-left" ] [ text "To redress this travesty, I created this game: perhaps after a couple of hours of intense training, we can outwit this cheeky monkey. Yes sir: nobody's gonna make a monkey out of me! (Do check out the video: it's quite cool!)" ]
                 , br [] []
                 , videoframe
                 , br [] []
@@ -383,9 +451,15 @@ videoframe =
         ]
         []
 
+
+
 -- Commands
+
+
 randomiseNumbers : Cmd Msg
 randomiseNumbers =
-   Random.generate RandomizeNumbers (Random.List.shuffle (range startingNumber totalNumbers))
+    Random.generate RandomizeNumbers (Random.List.shuffle (range startingNumber totalNumbers))
+
+
 
 {- , property "allow" (Json.Encode.string "accelerometer; gyroscope; picture-in-picture") -}
