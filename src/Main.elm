@@ -102,7 +102,7 @@ update msg model =
                 Browser.External href ->
                     ( model, Nav.load href )
 
-        UrlChanged url ->
+        UrlChanged url ->          
             ( { model | url = url }
             , Cmd.none
             )
@@ -162,14 +162,32 @@ subscriptions _ =
 view : Model -> Browser.Document Msg
 view model =
     case model.url.path of
-        "/home" ->
+        "/numberSequence/home" ->
             game model
 
-        "/genesis" ->
+        "/numberSequence/genesis" ->
             genesisOfTheGame model
 
         _ ->
             game model
+
+
+debugger : Model -> Browser.Document Msg
+debugger model =
+  { title = "URL Interceptor"
+  , body =
+      [ text "The current URL is: "
+      , b [] [ text (Url.toString model.url) ]
+      , ul []
+          [ viewLink "/home" "home"
+          , viewLink "/profile" "profile"
+          , viewLink "/reviews/the-century-of-the-self"  "/reviews/the-century-of-the-self" 
+          , viewLink "/reviews/public-opinion" "/reviews/public-opinion"
+          , viewLink "/reviews/shah-of-shahs" "/reviews/shah-of-shahs"
+          ]
+      ]
+  }
+
 
 
 game : Model -> Browser.Document Msg
@@ -185,7 +203,7 @@ game model =
                 , showButtons model
                 , br [] []
                 , gameButtonOptions model
-                , viewLink "/genesis" "Genesis of this game?"
+                , viewLink "/numberSequence/genesis" "Genesis of this game?"
                 ]
             ]
         ]
@@ -297,7 +315,7 @@ genesisOfTheGame model =
                 , videoframe
                 , br [] []
                 , br [] []
-                , viewLink "/home" "Back to game"
+                , viewLink "/numberSequence/home" "Back to game"
                 ]
             ]
         ]
