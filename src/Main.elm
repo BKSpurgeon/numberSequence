@@ -33,10 +33,7 @@ main =
         , onUrlRequest = LinkClicked
         }
 
-
-
 -- MODEL
-
 
 type alias Model =
     { key : Nav.Key
@@ -81,14 +78,21 @@ type Msg
     | NumberPressed Int
     | ResetLevel
     | NextLevel
+    | PreviousLevel
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
+        getFinalLevelNumber = case (List.minimum [model.endingNumber + 1, totalNumbers]) of
+             Just finalLevel ->
+                 finalLevel
+             Nothing ->
+                 totalNumbers
+
         proceedToNextLevel = ({model | gameState = BeforeStarting
                                         , currentNumberToClick = 1
-                                        , endingNumber = model.endingNumber + 1}, randomiseNumbers)
+                                        , endingNumber = getFinalLevelNumber}, randomiseNumbers)
             
     in        
     case msg of
@@ -145,6 +149,18 @@ update msg model =
             ({model | gameState = BeforeStarting, currentNumberToClick = startingNumber}, Cmd.none)
         NextLevel ->
             proceedToNextLevel
+        PreviousLevel ->
+            let
+                previousLevelNumber = if (model.endingNumber - 1) >= (startingNumber + 1) then
+                                         (model.endingNumber - 1)
+                                      else 
+                                         startingNumber + 1
+            in
+                
+            ({model | gameState = BeforeStarting
+                                        , currentNumberToClick = 1
+                                        , endingNumber = previousLevelNumber}, randomiseNumbers)
+
 
 
 -- SUBSCRIPTIONS
@@ -195,19 +211,32 @@ game model =
     { title = "Number Sequence Game"
     , body =
         [ section [ class "section" ]
-            [ div [ class "container" ]
-                [ h1 [] [ text "Number Sequence Game" ]                
-                , br [] []
-                , instructions model
-                , br [] [] 
-                , showButtons model
-                , br [] []
-                , gameButtonOptions model
-                , viewLink "/numberSequence/genesis" "Genesis of this game?"
-                ]
-            ]
+                  [ div [ class "container" ]
+                    [ h1 [] [ text "Number Sequence Game" ]                
+                    , br [] []
+                    , instructions model
+                    , br [] []                  
+                    , showButtons model
+                    , br [] []
+                    , gameButtonOptions model
+                    , br [] []
+                    , gameSettingsLinks model
+                    , br [] []
+                    , viewLink "/numberSequence/genesis" "Genesis of this game?"
+                    ]
+                  ]
         ]
     }
+
+gameSettingsLinks : Model -> Html Msg
+gameSettingsLinks model =
+    if model.gameState == Lose || model.gameState == Win then
+      div [] []
+    else
+    div []
+        [ button [class "button is-link is-light", onClick PreviousLevel][ text "< Previous "]
+        , button [class "button is-link is-light", onClick NextLevel][ text "Next >"]
+        ]
 
 gameButtonOptions : Model -> Html Msg
 gameButtonOptions model =
@@ -310,8 +339,8 @@ genesisOfTheGame model =
         [ section [ class "section" ]
             [ div [ class "container" ]
                 [ h1 [] [ text "Number Sequence Game: Genesis" ]
-                , p [] [ text "After watching the following video, it dawned on me that chimps can beat humans (albeit with some training)!" ]
-                , p [] [ text "Perhaps we can, in fact, be trained to beat chimps? Hence the genesis of this game. You can see the video below:" ]
+                , p [] [ text "After watching the following video, it dawned on me: are chimps smarter than humans at memorising number positions?" ]
+                , p [] [ text "To redress this travesty, I created this game: perhaps after a couple of hours of intense training, we can outwit this cheeky monkey. Yes sir: nobody's gonna make a money out of me! (Do check out the video: it's quite cool!)" ]
                 , videoframe
                 , br [] []
                 , br [] []
