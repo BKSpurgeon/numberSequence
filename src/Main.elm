@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, a, b, br, button, div, h1, iframe, img, li, p, section, text, ul)
+import Html exposing (..)
 import Html.Attributes exposing (class, disabled, height, href, property, src, width)
 import Html.Events exposing (onClick)
 import Json.Encode
@@ -266,6 +266,7 @@ game model =
         [ section [ class "section" ]
             [ div [ class "container" ]
                 [ h1 [] [ text "Number Sequence Game" ]
+                , small [class "is-size-7"] [text "Goal: Can you get to level 20?"]
                 , br [] []
                 , instructions model
                 , br [] []
