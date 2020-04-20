@@ -1,5 +1,9 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
+    "revision": "56a392d5da74418ac4104728abb5d947",
+    "url": "/numberSequence/404.html"
+  },
+  {
     "revision": "7c4c6c26e808603d3e0765d97c07b997",
     "url": "/numberSequence/favicon.ico"
   },
@@ -32,7 +36,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/numberSequence/favicon_io/site.webmanifest"
   },
   {
-    "revision": "668f6f7eb1f0561840d45b91e0446c80",
+    "revision": "88206405a681601efad2e466ac11fcb2",
     "url": "/numberSequence/index.html"
   },
   {
@@ -44,12 +48,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/numberSequence/manifest.json"
   },
   {
-    "revision": "9e3a803aebcb8e450a18",
+    "revision": "49b4ccccdcba82d6ecfa",
     "url": "/numberSequence/static/css/main.7f457dfb.chunk.css"
   },
   {
-    "revision": "9e3a803aebcb8e450a18",
-    "url": "/numberSequence/static/js/main.9e3a803a.chunk.js"
+    "revision": "49b4ccccdcba82d6ecfa",
+    "url": "/numberSequence/static/js/main.49b4cccc.chunk.js"
   },
   {
     "revision": "3e952f2e8e70386d81eb",
