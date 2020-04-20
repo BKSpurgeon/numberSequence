@@ -289,7 +289,8 @@ gameSettingsLinks model =
 
     else
         div []
-            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous " ]             
+            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous Level" ]             
+            , button [ class "button is-link is-light", onClick NextLevel ] [ text " Next Level > " ]             
             ]
 
 
