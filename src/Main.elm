@@ -18,8 +18,11 @@ import Browser.Dom exposing (Viewport)
 {-
    To do:
        (1) Update the favicon.ico requirements (multiple sizes) - see the images in the public folder, and follow the link in the manifest.json file explaining how to handle favicos.
-       (2) Resise the  youtube video depending on the size of the window.
+       (2) The window width is set when the game starts: but what if the window width changes? let's handle that too.
+       (2a) Fix: the grid and button sizes
        (3) Fix: Styling of the game: make it look sleek and nice, for mobile and web views.
+       (4) We can't have the links actually change the URL of the game.
+       (5) Add in: basic vs Advanced game play versions.
 -}
 -- MAIN
 
