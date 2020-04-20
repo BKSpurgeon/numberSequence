@@ -521,7 +521,7 @@ viewLink path textAnnotation =
 videoframe windowWidth =
     let
         calculdatedWidth = if windowWidth < 560 then
-                             ((round windowWidth) - 50)
+                             ((round windowWidth) - 80)
                            else
                              560
     in
