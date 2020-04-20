@@ -422,28 +422,28 @@ showButton model numberOnButton =
                         String.fromInt numberOnButton
 
                     else
-                        "x"
+                        ""
 
                 Running ->
                     if numberOnButton <= model.endingNumber then
-                        "x"
+                        ""
 
                     else
-                        "x"
+                        ""
 
                 Lose ->
                     if numberOnButton <= model.endingNumber then
                         String.fromInt numberOnButton
 
                     else
-                        "x"
+                        ""
 
                 Win ->
                     if numberOnButton <= model.endingNumber then
                         String.fromInt numberOnButton
 
                     else
-                        "x"
+                        ""
 
         setButtonClass =
             case model.gameState of
