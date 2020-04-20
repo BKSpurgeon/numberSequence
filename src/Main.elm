@@ -10,6 +10,8 @@ import List exposing (drop, range, take)
 import Random
 import Random.List exposing (shuffle)
 import Url
+import Task
+import Browser.Dom exposing (Viewport)
 
 
 
@@ -46,12 +48,13 @@ type alias Model =
     , endingNumber : Int
     , gameState : GameState
     , numbers : List Int
+    , windowWidth : Float
     }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model key url 1 0 3 BeforeStarting []
+    ( Model key url 1 0 3 BeforeStarting [] 560
     , randomiseNumbers
     )
 
@@ -89,6 +92,7 @@ type Msg
     | ResetLevel
     | NextLevel
     | PreviousLevel
+    | ViewPortInfo Viewport
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -114,7 +118,7 @@ update msg model =
     in
     case msg of
         RandomizeNumbers numbers ->
-            ( { model | numbers = numbers }, Cmd.none )
+            ( { model | numbers = numbers }, getWindowWidth )
 
         LinkClicked urlRequest ->
             case urlRequest of
@@ -205,6 +209,8 @@ update msg model =
               }
             , randomiseNumbers
             )
+        ViewPortInfo viewport->
+            ({model | windowWidth = viewport.viewport.width}, Cmd.none)
 
 
 
@@ -280,8 +286,7 @@ gameSettingsLinks model =
 
     else
         div []
-            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous " ]
-            , button [ class "button is-link is-light", onClick NextLevel ] [ text "Next >" ]
+            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous " ]             
             ]
 
 
@@ -426,7 +431,7 @@ genesisOfTheGame model =
                 , br [] []
                 , p [ class "has-text-left" ] [ text "To redress this travesty, I created this game: perhaps after a couple of hours of intense training, we can outwit this cheeky monkey. Yes sir: nobody's gonna make a monkey out of me! (Do check out the video: it's quite cool!)" ]
                 , br [] []
-                , videoframe
+                , videoframe model.windowWidth
                 , br [] []
                 , br [] []
                 , viewLink "/numberSequence/home" "Back to game"
@@ -441,9 +446,16 @@ viewLink path textAnnotation =
     div [] [ a [ href path ] [ text textAnnotation ] ]
 
 
-videoframe =
+videoframe windowWidth =
+    let
+        calculdatedWidth = if windowWidth < 560 then
+                             ((round windowWidth) - 50)
+                           else
+                             560
+    in
+    
     iframe
-        [ width 560
+        [ width calculdatedWidth
         , height 315
         , src "https://www.youtube.com/embed/zsXP8qeFF6A"
         , property "frameborder" (Json.Encode.string "0")
@@ -461,5 +473,8 @@ randomiseNumbers =
     Random.generate RandomizeNumbers (Random.List.shuffle (range startingNumber totalNumbers))
 
 
+getWindowWidth : Cmd Msg
+getWindowWidth =
+  Task.perform ViewPortInfo Browser.Dom.getViewport
 
 {- , property "allow" (Json.Encode.string "accelerometer; gyroscope; picture-in-picture") -}
