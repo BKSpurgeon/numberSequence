@@ -52,12 +52,13 @@ type alias Model =
     , gameState : GameState
     , numbers : List Int
     , windowWidth : Float
+    , gameMode : GameMode
     }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model key url 1 0 3 BeforeStarting [] 560
+    ( Model key url 1 0 3 BeforeStarting [] 560 Hard
     , randomiseNumbers
     )
 
@@ -65,6 +66,9 @@ init flags url key =
 
 -- Initial Values functions
 
+type GameMode
+    = Easy
+    | Hard
 
 type GameState
     = BeforeStarting
@@ -96,6 +100,7 @@ type Msg
     | NextLevel
     | PreviousLevel
     | ViewPortInfo Viewport
+    | SetGameMode GameMode
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -183,8 +188,27 @@ update msg model =
                     else
                         ( { model | currentNumberToClick = model.currentNumberToClick + 1, numberClicked = number }, Cmd.none )
 
-                Win ->
-                    proceedToNextLevel
+                Win ->    
+                  case model.gameMode of
+                      Easy ->
+                        ( { model
+                                | gameState = BeforeStarting
+                                , currentNumberToClick = 1
+                                , numberClicked = 0
+                                , endingNumber = getFinalLevelNumber
+                              }
+                            , Cmd.none
+                            )
+
+                      Hard ->
+                             ( { model
+                                | gameState = BeforeStarting
+                                , currentNumberToClick = 1
+                                , numberClicked = 0
+                                , endingNumber = getFinalLevelNumber
+                              }
+                            , randomiseNumbers
+                            )                     
 
                 Lose ->
                     ( { model | currentNumberToClick = startingNumber, gameState = BeforeStarting, numberClicked = number }, Cmd.none )
@@ -193,7 +217,26 @@ update msg model =
             ( { model | gameState = BeforeStarting, currentNumberToClick = startingNumber, numberClicked = 0 }, Cmd.none )
 
         NextLevel ->
-            proceedToNextLevel
+            case model.gameMode of
+                Easy ->
+                    ( { model
+                            | gameState = BeforeStarting
+                            , currentNumberToClick = 1
+                            , numberClicked = 0
+                            , endingNumber = getFinalLevelNumber
+                          }
+                        , Cmd.none
+                        )
+
+                Hard ->
+                         ( { model
+                            | gameState = BeforeStarting
+                            , currentNumberToClick = 1
+                            , numberClicked = 0
+                            , endingNumber = getFinalLevelNumber
+                          }
+                        , randomiseNumbers
+                        )
 
         PreviousLevel ->
             let
@@ -214,6 +257,8 @@ update msg model =
             )
         ViewPortInfo viewport->
             ({model | windowWidth = viewport.viewport.width}, Cmd.none)
+        SetGameMode gameMode ->
+            ({model | gameMode = gameMode }, Cmd.none)
 
 
 
@@ -272,6 +317,8 @@ game model =
                 , br [] []
                 , showButtons model
                 , br [] []
+                , displayGameSettings model
+                , br [] []
                 , gameButtonOptions model
                 , br [] []
                 , gameSettingsLinks model
@@ -282,17 +329,37 @@ game model =
         ]
     }
 
+displayGameSettings : Model -> Html Msg
+displayGameSettings model =
+    let
+        displayGameModeString = case model.gameMode of
+                                  Easy -> "Easy"
+                                  Hard -> "Hard"
+            
+    in
+        
+    p [] [text ("Level: " ++ String.fromInt(model.endingNumber) ++ " - Mode: " ++ displayGameModeString  )]
+
 
 gameSettingsLinks : Model -> Html Msg
 gameSettingsLinks model =
-    if model.gameState == Lose || model.gameState == Win then
-        div [] []
+    let
+      gameModeButtons = [ button [ class "button is-primary is-light", onClick (SetGameMode Easy)] [ text "Set to Easy" ]  
+                        , button [ class "button is-primary is-light", onClick (SetGameMode Hard)] [ text "Set to Hard" ] 
+                        ]
 
+            
+    in
+        
+    if model.gameState == Lose || model.gameState == Win then
+        div [] ([br [][] ] ++ gameModeButtons)
     else
         div []
-            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous Level" ]             
-            , button [ class "button is-link is-light", onClick NextLevel ] [ text " Next Level > " ]             
-            ]
+            ([ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous Level" ]             
+                        , button [ class "button is-link is-light", onClick NextLevel ] [ text " Next Level > " ] 
+                        , br [] [] 
+                        , br [][]            
+                        ] ++ gameModeButtons)
 
 
 gameButtonOptions : Model -> Html Msg
@@ -312,10 +379,10 @@ instructions : Model -> Html Msg
 instructions model =
     case model.gameState of
         BeforeStarting ->
-            p [] [ text ("Instructions: Memorise the number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
+            p [] [ text ("Instructions: Memorise number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
 
         Running ->
-            p [] [text ("Level: " ++ String.fromInt(model.endingNumber) ++ " (Next Number to find: " ++ String.fromInt model.currentNumberToClick ++ ")" )]
+            p [] [ text ("Instructions: Memorise number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
 
         Win ->
             p [ class "notification is-success is-light" ] [ text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1)) ]
