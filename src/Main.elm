@@ -342,7 +342,7 @@ showButtons model =
 showButtonRow : Model -> List Int -> Html Msg
 showButtonRow model list =
     div [ class "columns is-mobile is-gapless" ]
-        (List.map (\x -> showButton model x) list)
+        ( [div [class "column"][]] ++  List.map (\x -> showButton model x) list ++ [div [class "column"][]])
 
 
 showButton : Model -> Int -> Html Msg
@@ -382,40 +382,40 @@ showButton model numberOnButton =
             case model.gameState of
                 BeforeStarting ->
                     if numberOnButton == model.numberClicked then
-                        "button is-info is-small"
+                        "button is-info is-large-desktop"
 
                     else if numberOnButton <= model.endingNumber then
-                        "button is-primary is-small"
+                        "button is-primary is-large-desktop"
 
                     else
-                        "button is-small"
+                        "button is-large-desktop"
 
                 Running ->
                     if numberOnButton == model.numberClicked then
-                        "button is-info is-small"
+                        "button is-info is-large-desktop"
 
                     else if numberOnButton <= model.endingNumber then
-                        "button is-primary is-small"
+                        "button is-primary is-large-desktop"
 
                     else
-                        "button is-small"
+                        "button is-large-desktop"
 
                 Lose ->
                     if numberOnButton == model.numberClicked then
-                        "button is-info is-small"
+                        "button is-info is-large-desktop"
 
                     else if numberOnButton <= model.endingNumber then
-                        "button is-primary is-small"
+                        "button is-primary is-large-desktop"
 
                     else
-                        "button is-danger is-small"
+                        "button is-danger is-large-desktop"
 
                 Win ->
                     if numberOnButton == model.numberClicked then
-                        "button is-info is-small"
+                        "button is-info is-large-desktop"
 
                     else if numberOnButton <= model.endingNumber then
-                        "button is-primary is-small"
+                        "button is-primary is-large-desktop"
 
                     else
                         "button is-small"
