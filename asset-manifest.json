@@ -1,7 +1,7 @@
 {
   "main.css": "/numberSequence/static/css/main.7f457dfb.chunk.css",
-  "main.js": "/numberSequence/static/js/main.49b4cccc.chunk.js",
-  "main.js.map": "/numberSequence/static/js/main.49b4cccc.chunk.js.map",
+  "main.js": "/numberSequence/static/js/main.34f32885.chunk.js",
+  "main.js.map": "/numberSequence/static/js/main.34f32885.chunk.js.map",
   "runtime~main.js": "/numberSequence/static/js/runtime~main.3e952f2e.js",
   "runtime~main.js.map": "/numberSequence/static/js/runtime~main.3e952f2e.js.map",
   "vendors~main.js": "/numberSequence/static/js/vendors~main.7aa09ec8.chunk.js",
@@ -19,5 +19,5 @@
   "index.html": "/numberSequence/index.html",
   "logo.svg": "/numberSequence/logo.svg",
   "manifest.json": "/numberSequence/manifest.json",
-  "precache-manifest.6013c038e1c489abaf8352a2af3cedee.js": "/numberSequence/precache-manifest.6013c038e1c489abaf8352a2af3cedee.js"
+  "precache-manifest.c21acf87dd22154ce2555c29617ee0fc.js": "/numberSequence/precache-manifest.c21acf87dd22154ce2555c29617ee0fc.js"
 }
