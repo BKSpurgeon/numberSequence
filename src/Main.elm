@@ -313,7 +313,7 @@ instructions model =
             p [] [ text ("Instructions: Memorise the number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
 
         Running ->
-            p [] []
+            p [] [text ("Level: " ++ String.fromInt(model.endingNumber) ++ " (Next Number to find: " ++ String.fromInt model.currentNumberToClick ++ ")" )]
 
         Win ->
             p [ class "notification is-success is-light" ] [ text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1)) ]
