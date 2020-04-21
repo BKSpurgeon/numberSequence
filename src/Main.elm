@@ -53,13 +53,13 @@ type alias Model =
     , gameState : GameState
     , numbers : List Int
     , windowWidth : Float
-    , gameMode : GameMode
+    , gameMode : Maybe GameMode
     }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model key url 1 0 3 BeforeStarting [] 560 Hard
+    ( Model key url 1 0 3 BeforeStarting [] 560 Nothing
     , randomiseNumbers
     )
 
@@ -191,25 +191,29 @@ update msg model =
 
                 Win ->    
                   case model.gameMode of
-                      Easy ->
-                        ( { model
-                                | gameState = BeforeStarting
-                                , currentNumberToClick = 1
-                                , numberClicked = 0
-                                , endingNumber = getFinalLevelNumber
-                              }
-                            , Cmd.none
-                            )
+                      Nothing ->
+                        (model, Cmd.none)
+                      Just gameMode ->
+                        case gameMode of
+                          Easy ->
+                            ( { model
+                                    | gameState = BeforeStarting
+                                    , currentNumberToClick = 1
+                                    , numberClicked = 0
+                                    , endingNumber = getFinalLevelNumber
+                                  }
+                                , Cmd.none
+                                )
 
-                      Hard ->
-                             ( { model
-                                | gameState = BeforeStarting
-                                , currentNumberToClick = 1
-                                , numberClicked = 0
-                                , endingNumber = getFinalLevelNumber
-                              }
-                            , randomiseNumbers
-                            )                     
+                          Hard ->
+                                 ( { model
+                                    | gameState = BeforeStarting
+                                    , currentNumberToClick = 1
+                                    , numberClicked = 0
+                                    , endingNumber = getFinalLevelNumber
+                                  }
+                                , randomiseNumbers
+                                )                     
 
                 Lose ->
                     ( { model | currentNumberToClick = startingNumber, gameState = BeforeStarting, numberClicked = number }, Cmd.none )
@@ -219,25 +223,29 @@ update msg model =
 
         NextLevel ->
             case model.gameMode of
-                Easy ->
-                    ( { model
-                            | gameState = BeforeStarting
-                            , currentNumberToClick = 1
-                            , numberClicked = 0
-                            , endingNumber = getFinalLevelNumber
-                          }
-                        , Cmd.none
-                        )
+                Nothing ->
+                    (model, Cmd.none)
+                Just gameMode ->
+                  case gameMode of
+                    Easy ->
+                        ( { model
+                                | gameState = BeforeStarting
+                                , currentNumberToClick = 1
+                                , numberClicked = 0
+                                , endingNumber = getFinalLevelNumber
+                              }
+                            , Cmd.none
+                            )
 
-                Hard ->
-                         ( { model
-                            | gameState = BeforeStarting
-                            , currentNumberToClick = 1
-                            , numberClicked = 0
-                            , endingNumber = getFinalLevelNumber
-                          }
-                        , randomiseNumbers
-                        )
+                    Hard ->
+                             ( { model
+                                | gameState = BeforeStarting
+                                , currentNumberToClick = 1
+                                , numberClicked = 0
+                                , endingNumber = getFinalLevelNumber
+                              }
+                            , randomiseNumbers
+                            )
 
         PreviousLevel ->
             let
@@ -259,7 +267,7 @@ update msg model =
         ViewPortInfo viewport->
             ({model | windowWidth = viewport.viewport.width}, Cmd.none)
         SetGameMode gameMode ->
-            ({model | gameMode = gameMode }, Cmd.none)
+            ({model | gameMode = Just gameMode }, Cmd.none)
 
 
 
@@ -312,19 +320,27 @@ game model =
         [ section [ class "section" ]
             [ div [ class "container" ]
                 [ h1 [] [ text "Number Sequence Game" ]
-                , small [class "is-size-7"] [text "Goal: Can you get to level 20?"]
-                , br [] []
-                , instructions model
-                , br [] []
-                , showButtons model
-                , br [] []
-                , displayGameSettings model
-                , br [] []
-                , gameButtonOptions model
-                , br [] []
-                , gameSettingsLinks model
-                , br [] []
-                , viewLink "/numberSequence/genesis" "Genesis of this game?"
+                    
+                , if model.gameMode == Nothing then
+                    div [] 
+                        [ br [] []                        
+                        , gameDifficultyButtons
+                        ]
+                  else
+                    div []
+                        [ small [class "is-size-7"] [text "Goal: Can you get to level 20?"]
+                        , br [] []           
+                        , instructions model
+                        , br [] []
+                        , showButtons model
+                        , br [] []
+                        , displayGameSettings model
+                        , br [] []
+                        , gameSettingsLinks model
+                        , br [] []
+                        , viewLink "/numberSequence/genesis" "Genesis of this game?"
+                        ]                    
+                , br [] []                
                 ]
             ]
         ]
@@ -334,33 +350,38 @@ displayGameSettings : Model -> Html Msg
 displayGameSettings model =
     let
         displayGameModeString = case model.gameMode of
-                                  Easy -> "Easy"
-                                  Hard -> "Hard"
+                                  Nothing -> "Not Set"
+                                  Just gameMode ->
+                                    case gameMode of 
+                                        Easy -> "Easy"
+                                        Hard -> "Hard"
+                                  
             
     in
         
     p [] [text ("Level: " ++ String.fromInt(model.endingNumber) ++ " - Mode: " ++ displayGameModeString  )]
 
 
+gameDifficultyButtons : Html Msg
+gameDifficultyButtons =
+    div []
+        [ button [ class "button is-primary is-light", onClick (SetGameMode Easy)] [ text "Set to Easy" ]  
+        , button [ class "button is-primary is-light", onClick (SetGameMode Hard)] [ text "Set to Hard" ] 
+        ]
+
+
 gameSettingsLinks : Model -> Html Msg
 gameSettingsLinks model =
-    let
-      gameModeButtons = [ button [ class "button is-primary is-light", onClick (SetGameMode Easy)] [ text "Set to Easy" ]  
-                        , button [ class "button is-primary is-light", onClick (SetGameMode Hard)] [ text "Set to Hard" ] 
-                        ]
-
-            
-    in
-        
     if model.gameState == Lose || model.gameState == Win then
-        div [] ([br [][] ] ++ gameModeButtons)
+        div [] []
     else
         div []
-            ([ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous Level" ]             
-                        , button [ class "button is-link is-light", onClick NextLevel ] [ text " Next Level > " ] 
-                        , br [] [] 
-                        , br [][]            
-                        ] ++ gameModeButtons)
+            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous Level" ]             
+            , button [ class "button is-link is-light", onClick NextLevel ] [ text " Next Level > " ] 
+            , br [] []   
+            , br [] []          
+            , gameDifficultyButtons
+            ] 
 
 
 gameButtonOptions : Model -> Html Msg
