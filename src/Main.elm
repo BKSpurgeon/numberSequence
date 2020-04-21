@@ -343,6 +343,7 @@ game model =
                         , br [] []
                         , gameSettingsLinks model
                         , br [] []
+                        , br [] []
                         , viewLink "/numberSequence/genesis" "Genesis of this game?"
                         ]                    
                 , br [] []                
@@ -378,7 +379,14 @@ gameDifficultyButtons =
 gameSettingsLinks : Model -> Html Msg
 gameSettingsLinks model =
     if model.gameState == Lose || model.gameState == Win then
-        div [] []
+        case model.gameState of
+        Lose ->
+            button [ class "button is-info", onClick ResetLevel ] [ text "Reset Game" ]
+
+        Win ->
+            button [ class "button is-info", onClick NextLevel ] [ text "Go to the next level!" ]
+        _ ->
+            div [][]
     else
         div []
             [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous Level" ]             
