@@ -164,6 +164,8 @@ update msg model =
 
                     else
                         False
+
+                youclickedCorrectly = model.currentNumberToClick == number 
             in
             case model.gameState of
                 BeforeStarting ->
@@ -187,7 +189,10 @@ update msg model =
                         ( { model | gameState = Win, numberClicked = number }, Cmd.none )
 
                     else
-                        ( { model | currentNumberToClick = model.currentNumberToClick + 1, numberClicked = number }, Cmd.none )
+                        if youclickedCorrectly then
+                            ( { model | currentNumberToClick = model.currentNumberToClick + 1, numberClicked = number }, Cmd.none )
+                        else
+                            ( { model | numberClicked = number }, Cmd.none )
 
                 Win ->    
                   case model.gameMode of
