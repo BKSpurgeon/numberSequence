@@ -328,7 +328,9 @@ game model =
                     
                 , if model.gameMode == Nothing then
                     div [] 
-                        [ br [] []                        
+                        [ br [] []
+                        , h3 [] [text "Choose game difficulty level:"]                        
+                        , br [] []
                         , gameDifficultyButtons
                         ]
                   else
@@ -520,10 +522,16 @@ showButton model numberOnButton =
                         "button is-primary is-large-desktop"
 
                     else
-                        "button is-small"
+                        "button is-success is-light is-small"
+
+        isNumberInApplicable = if numberOnButton <= model.endingNumber then
+                            False
+                          else
+                            True
+
     in
     div [ class "column" ]
-        [ button [ class setButtonClass, onClick (NumberPressed numberOnButton) ] [ text displayTextOnButton ]
+        [ button [ class setButtonClass, onClick (NumberPressed numberOnButton), disabled isNumberInApplicable ] [ text displayTextOnButton ]
         ]
 
 
