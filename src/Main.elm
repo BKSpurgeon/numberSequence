@@ -20,9 +20,10 @@ import Browser.Dom exposing (Viewport)
        (1) Update the favicon.ico requirements (multiple sizes) - see the images in the public folder, and follow the link in the manifest.json file explaining how to handle favicos.
        (2) The window width is set when the game starts: but what if the window width changes? let's handle that too.
        (2a) Fix: the grid and button sizes
-       (3) Fix: Styling of the game: make it look sleek and nice, for mobile and web views.
-       (4) We can't have the links actually change the URL of the game.
-       (5) Add in: basic vs Advanced game play versions.
+       (3) Fix: Styling of the game: make it look sleek and nice, for mobile and web views.       
+       (4) Make the advanced / easy game settings appear at the start of the game.
+       (5) Bring up a modal when the level completes.
+       (6) Reduce the verbiage at the top of the screen.
 -}
 -- MAIN
 
