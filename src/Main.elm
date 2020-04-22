@@ -299,7 +299,7 @@ view model =
         _ ->
             game model
 
-
+{-
 debugger : Model -> Browser.Document Msg
 debugger model =
     { title = "URL Interceptor"
@@ -315,7 +315,7 @@ debugger model =
             ]
         ]
     }
-
+-}
 
 game : Model -> Browser.Document Msg
 game model =
@@ -370,7 +370,7 @@ displayGameSettings model =
 gameDifficultyButtons : Html Msg
 gameDifficultyButtons =
     div []
-        [ button [ class "button button is-success is-rounded ", onClick (SetGameMode Easy)] [ text "Set to Easy" ]  
+        [ button [ class "button button is-success is-rounded", onClick (SetGameMode Easy)] [ text "Set to Easy" ]  
         , button [ class "button button is-danger is-rounded ", onClick (SetGameMode Hard)] [ text "Set to Hard" ] 
         ]
 
@@ -419,7 +419,10 @@ instructions model =
             p [] [ text ("Instructions: Memorise number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
 
         Win ->
-            p [ class "notification is-success is-light" ] [ text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1)) ]
+            if model.currentNumberToClick == totalNumbers then
+              p [ class "notification is-success is-light" ] [ text ("Congrats: You have finished the game: perhaps try again with a faster time?") ]
+            else
+              p [ class "notification is-success is-light" ] [ text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1)) ]
 
         Lose ->
             p [] [ text "Oh no! Wanna try again?" ]
