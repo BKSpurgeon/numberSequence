@@ -14,16 +14,15 @@ import Task
 import Browser.Dom exposing (Viewport)
 
 
-
 {-
    To do:
        (1) Update the favicon.ico requirements (multiple sizes) - see the images in the public folder, and follow the link in the manifest.json file explaining how to handle favicos.
        (2) The window width is set when the game starts: but what if the window width changes? let's handle that too.
        (2a) Fix: the grid and button sizes
-       (3) Fix: Styling of the game: make it look sleek and nice, for mobile and web views.       
-       (4) Make the advanced / easy game settings appear at the start of the game.
-       (5) Bring up a modal when the level completes.
+       (3) Fix: Styling of the game: make it look sleek and nice, for mobile and web views.              
+       (5) Bring up a modal when the level completes / use a modal at the beginning of the game?
        (6) Reduce the verbiage at the top of the screen.
+       (7) Consider this talk: https://medium.com/elm-shorts/how-to-make-impossible-states-impossible-c12a07e907b5
 -}
 -- MAIN
 
@@ -324,20 +323,18 @@ game model =
     , body =
         [ section [ class "section" ]
             [ div [ class "container" ]
-                [ h1 [] [ text "Number Sequence Game" ]
-                    
-                , if model.gameMode == Nothing then
+                [ 
+                 if model.gameMode == Nothing then
                     div [] 
-                        [ br [] []
+                        [ h2 [] [ text "Number Sequence Game" ]                    
+                        , br [] []
                         , h3 [] [text "Choose game difficulty level:"]                        
                         , br [] []
                         , gameDifficultyButtons
                         ]
                   else
                     div []
-                        [ small [class "is-size-7"] [text "Goal: Can you get to level 20?"]
-                        , br [] []           
-                        , instructions model
+                        [ instructions model
                         , br [] []
                         , showButtons model
                         , br [] []
@@ -373,8 +370,8 @@ displayGameSettings model =
 gameDifficultyButtons : Html Msg
 gameDifficultyButtons =
     div []
-        [ button [ class "button is-primary is-light", onClick (SetGameMode Easy)] [ text "Set to Easy" ]  
-        , button [ class "button is-primary is-light", onClick (SetGameMode Hard)] [ text "Set to Hard" ] 
+        [ button [ class "button button is-success is-rounded ", onClick (SetGameMode Easy)] [ text "Set to Easy" ]  
+        , button [ class "button button is-danger is-rounded ", onClick (SetGameMode Hard)] [ text "Set to Hard" ] 
         ]
 
 
@@ -418,7 +415,7 @@ instructions model =
         BeforeStarting ->
             p [] [ text ("Instructions: Memorise number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
 
-        Running ->
+        Running ->            
             p [] [ text ("Instructions: Memorise number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
 
         Win ->
