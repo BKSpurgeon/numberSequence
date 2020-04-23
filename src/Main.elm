@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Browser
+import Browser.Dom exposing (Viewport)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (class, disabled, height, href, property, src, width)
@@ -9,9 +10,9 @@ import Json.Encode
 import List exposing (drop, range, take)
 import Random
 import Random.List exposing (shuffle)
-import Url
 import Task
-import Browser.Dom exposing (Viewport)
+import Url
+
 
 
 {-
@@ -19,10 +20,9 @@ import Browser.Dom exposing (Viewport)
        (1) Update the favicon.ico requirements (multiple sizes) - see the images in the public folder, and follow the link in the manifest.json file explaining how to handle favicos.
        (2) The window width is set when the game starts: but what if the window width changes? let's handle that too.
        (2a) Fix: the grid and button sizes
-       (3) Fix: Styling of the game: make it look sleek and nice, for mobile and web views.              
+       (3) Fix: Styling of the game: make it look sleek and nice, for mobile and web views.
        (5) Bring up a modal when the level completes / use a modal at the beginning of the game?
-       (6) Reduce the verbiage at the top of the screen.
-       (7) Consider this talk: https://medium.com/elm-shorts/how-to-make-impossible-states-impossible-c12a07e907b5
+       (6) Consider this talk: https://medium.com/elm-shorts/how-to-make-impossible-states-impossible-c12a07e907b5
 -}
 -- MAIN
 
@@ -66,9 +66,11 @@ init flags url key =
 
 -- Initial Values functions
 
+
 type GameMode
     = Easy
     | Hard
+
 
 type GameState
     = BeforeStarting
@@ -164,7 +166,8 @@ update msg model =
                     else
                         False
 
-                youclickedCorrectly = model.currentNumberToClick == number 
+                youclickedCorrectly =
+                    model.currentNumberToClick == number
             in
             case model.gameState of
                 BeforeStarting ->
@@ -187,37 +190,38 @@ update msg model =
                     else if levelIsFinished then
                         ( { model | gameState = Win, numberClicked = number }, Cmd.none )
 
+                    else if youclickedCorrectly then
+                        ( { model | currentNumberToClick = model.currentNumberToClick + 1, numberClicked = number }, Cmd.none )
+
                     else
-                        if youclickedCorrectly then
-                            ( { model | currentNumberToClick = model.currentNumberToClick + 1, numberClicked = number }, Cmd.none )
-                        else
-                            ( { model | numberClicked = number }, Cmd.none )
+                        ( { model | numberClicked = number }, Cmd.none )
 
-                Win ->    
-                  case model.gameMode of
-                      Nothing ->
-                        (model, Cmd.none)
-                      Just gameMode ->
-                        case gameMode of
-                          Easy ->
-                            ( { model
-                                    | gameState = BeforeStarting
-                                    , currentNumberToClick = 1
-                                    , numberClicked = 0
-                                    , endingNumber = getFinalLevelNumber
-                                  }
-                                , Cmd.none
-                                )
+                Win ->
+                    case model.gameMode of
+                        Nothing ->
+                            ( model, Cmd.none )
 
-                          Hard ->
-                                 ( { model
-                                    | gameState = BeforeStarting
-                                    , currentNumberToClick = 1
-                                    , numberClicked = 0
-                                    , endingNumber = getFinalLevelNumber
-                                  }
-                                , randomiseNumbers
-                                )                     
+                        Just gameMode ->
+                            case gameMode of
+                                Easy ->
+                                    ( { model
+                                        | gameState = BeforeStarting
+                                        , currentNumberToClick = 1
+                                        , numberClicked = 0
+                                        , endingNumber = getFinalLevelNumber
+                                      }
+                                    , Cmd.none
+                                    )
+
+                                Hard ->
+                                    ( { model
+                                        | gameState = BeforeStarting
+                                        , currentNumberToClick = 1
+                                        , numberClicked = 0
+                                        , endingNumber = getFinalLevelNumber
+                                      }
+                                    , randomiseNumbers
+                                    )
 
                 Lose ->
                     ( { model | currentNumberToClick = startingNumber, gameState = BeforeStarting, numberClicked = number }, Cmd.none )
@@ -228,11 +232,12 @@ update msg model =
         NextLevel ->
             case model.gameMode of
                 Nothing ->
-                    (model, Cmd.none)
+                    ( model, Cmd.none )
+
                 Just gameMode ->
-                  case gameMode of
-                    Easy ->
-                        ( { model
+                    case gameMode of
+                        Easy ->
+                            ( { model
                                 | gameState = BeforeStarting
                                 , currentNumberToClick = 1
                                 , numberClicked = 0
@@ -241,8 +246,8 @@ update msg model =
                             , Cmd.none
                             )
 
-                    Hard ->
-                             ( { model
+                        Hard ->
+                            ( { model
                                 | gameState = BeforeStarting
                                 , currentNumberToClick = 1
                                 , numberClicked = 0
@@ -268,10 +273,12 @@ update msg model =
               }
             , randomiseNumbers
             )
-        ViewPortInfo viewport->
-            ({model | windowWidth = viewport.viewport.width}, Cmd.none)
+
+        ViewPortInfo viewport ->
+            ( { model | windowWidth = viewport.viewport.width }, Cmd.none )
+
         SetGameMode gameMode ->
-            ({model | gameMode = Just gameMode }, Cmd.none)
+            ( { model | gameMode = Just gameMode }, Cmd.none )
 
 
 
@@ -299,23 +306,26 @@ view model =
         _ ->
             game model
 
+
+
 {-
-debugger : Model -> Browser.Document Msg
-debugger model =
-    { title = "URL Interceptor"
-    , body =
-        [ text "The current URL is: "
-        , b [] [ text (Url.toString model.url) ]
-        , ul []
-            [ viewLink "/home" "home"
-            , viewLink "/profile" "profile"
-            , viewLink "/reviews/the-century-of-the-self" "/reviews/the-century-of-the-self"
-            , viewLink "/reviews/public-opinion" "/reviews/public-opinion"
-            , viewLink "/reviews/shah-of-shahs" "/reviews/shah-of-shahs"
-            ]
-        ]
-    }
+   debugger : Model -> Browser.Document Msg
+   debugger model =
+       { title = "URL Interceptor"
+       , body =
+           [ text "The current URL is: "
+           , b [] [ text (Url.toString model.url) ]
+           , ul []
+               [ viewLink "/home" "home"
+               , viewLink "/profile" "profile"
+               , viewLink "/reviews/the-century-of-the-self" "/reviews/the-century-of-the-self"
+               , viewLink "/reviews/public-opinion" "/reviews/public-opinion"
+               , viewLink "/reviews/shah-of-shahs" "/reviews/shah-of-shahs"
+               ]
+           ]
+       }
 -}
+
 
 game : Model -> Browser.Document Msg
 game model =
@@ -323,15 +333,15 @@ game model =
     , body =
         [ section [ class "section" ]
             [ div [ class "container" ]
-                [ 
-                 if model.gameMode == Nothing then
-                    div [] 
-                        [ h2 [] [ text "Number Sequence Game" ]                    
+                [ if model.gameMode == Nothing then
+                    div []
+                        [ h2 [] [ text "Number Sequence Game" ]
                         , br [] []
-                        , h3 [] [text "Choose game difficulty level:"]                        
+                        , h3 [] [ text "Choose game difficulty level:" ]
                         , br [] []
                         , gameDifficultyButtons
                         ]
+
                   else
                     div []
                         [ instructions model
@@ -344,34 +354,38 @@ game model =
                         , br [] []
                         , br [] []
                         , viewLink "/numberSequence/genesis" "Genesis of this game?"
-                        ]                    
-                , br [] []                
+                        ]
+                , br [] []
                 ]
             ]
         ]
     }
 
+
 displayGameSettings : Model -> Html Msg
 displayGameSettings model =
     let
-        displayGameModeString = case model.gameMode of
-                                  Nothing -> "Not Set"
-                                  Just gameMode ->
-                                    case gameMode of 
-                                        Easy -> "Easy"
-                                        Hard -> "Hard"
-                                  
-            
+        displayGameModeString =
+            case model.gameMode of
+                Nothing ->
+                    "Not Set"
+
+                Just gameMode ->
+                    case gameMode of
+                        Easy ->
+                            "Easy"
+
+                        Hard ->
+                            "Hard"
     in
-        
-    p [] [text ("Level: " ++ String.fromInt(model.endingNumber) ++ " - Mode: " ++ displayGameModeString  )]
+    p [] [ text ("Level: " ++ String.fromInt model.endingNumber ++ " - Mode: " ++ displayGameModeString) ]
 
 
 gameDifficultyButtons : Html Msg
 gameDifficultyButtons =
     div []
-        [ button [ class "button button is-success is-rounded", onClick (SetGameMode Easy)] [ text "Set to Easy" ]  
-        , button [ class "button button is-danger is-rounded ", onClick (SetGameMode Hard)] [ text "Set to Hard" ] 
+        [ button [ class "button button is-success is-rounded", onClick (SetGameMode Easy) ] [ text "Set to Easy" ]
+        , button [ class "button button is-danger is-rounded ", onClick (SetGameMode Hard) ] [ text "Set to Hard" ]
         ]
 
 
@@ -379,21 +393,23 @@ gameSettingsLinks : Model -> Html Msg
 gameSettingsLinks model =
     if model.gameState == Lose || model.gameState == Win then
         case model.gameState of
-        Lose ->
-            button [ class "button is-info", onClick ResetLevel ] [ text "Reset Game" ]
+            Lose ->
+                button [ class "button is-info", onClick ResetLevel ] [ text "Reset Game" ]
 
-        Win ->
-            button [ class "button is-info", onClick NextLevel ] [ text "Go to the next level!" ]
-        _ ->
-            div [][]
+            Win ->
+                button [ class "button is-info", onClick NextLevel ] [ text "Go to the next level!" ]
+
+            _ ->
+                div [] []
+
     else
         div []
-            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous Level" ]             
-            , button [ class "button is-link is-light", onClick NextLevel ] [ text " Next Level > " ] 
-            , br [] []   
-            , br [] []          
+            [ button [ class "button is-link is-light", onClick PreviousLevel ] [ text "< Previous Level" ]
+            , button [ class "button is-link is-light", onClick NextLevel ] [ text " Next Level > " ]
+            , br [] []
+            , br [] []
             , gameDifficultyButtons
-            ] 
+            ]
 
 
 gameButtonOptions : Model -> Html Msg
@@ -415,14 +431,15 @@ instructions model =
         BeforeStarting ->
             p [] [ text ("Instructions: Memorise number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
 
-        Running ->            
+        Running ->
             p [] [ text ("Instructions: Memorise number positions, then click from 1 to " ++ String.fromInt model.endingNumber) ]
 
         Win ->
             if model.currentNumberToClick == totalNumbers then
-              p [ class "notification is-success is-light" ] [ text ("Congrats: You have finished the game: perhaps try again with a faster time?") ]
+                p [ class "notification is-success is-light" ] [ text "Congrats: You have finished the game: perhaps try again with a faster time?" ]
+
             else
-              p [ class "notification is-success is-light" ] [ text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1)) ]
+                p [ class "notification is-success is-light" ] [ text ("Congrats! Let's progress to level " ++ String.fromInt (model.endingNumber + 1)) ]
 
         Lose ->
             p [] [ text "Oh no! Wanna try again?" ]
@@ -446,7 +463,7 @@ showButtons model =
 showButtonRow : Model -> List Int -> Html Msg
 showButtonRow model list =
     div [ class "columns is-mobile is-gapless" ]
-        ( [div [class "column"][]] ++  List.map (\x -> showButton model x) list ++ [div [class "column"][]])
+        ([ div [ class "column" ] [] ] ++ List.map (\x -> showButton model x) list ++ [ div [ class "column" ] [] ])
 
 
 showButton : Model -> Int -> Html Msg
@@ -524,11 +541,12 @@ showButton model numberOnButton =
                     else
                         "button is-success is-light is-small"
 
-        isNumberInApplicable = if numberOnButton <= model.endingNumber then
-                            False
-                          else
-                            True
+        isNumberInApplicable =
+            if numberOnButton <= model.endingNumber then
+                False
 
+            else
+                True
     in
     div [ class "column" ]
         [ button [ class setButtonClass, onClick (NumberPressed numberOnButton), disabled isNumberInApplicable ] [ text displayTextOnButton ]
@@ -563,12 +581,13 @@ viewLink path textAnnotation =
 
 videoframe windowWidth =
     let
-        calculdatedWidth = if windowWidth < 560 then
-                             ((round windowWidth) - 80)
-                           else
-                             560
+        calculdatedWidth =
+            if windowWidth < 560 then
+                round windowWidth - 80
+
+            else
+                560
     in
-    
     iframe
         [ width calculdatedWidth
         , height 315
@@ -590,6 +609,8 @@ randomiseNumbers =
 
 getWindowWidth : Cmd Msg
 getWindowWidth =
-  Task.perform ViewPortInfo Browser.Dom.getViewport
+    Task.perform ViewPortInfo Browser.Dom.getViewport
+
+
 
 {- , property "allow" (Json.Encode.string "accelerometer; gyroscope; picture-in-picture") -}
